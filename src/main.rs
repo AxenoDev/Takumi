@@ -3,7 +3,6 @@ mod config;
 use crate::config::TakumiConfig;
 use anyhow::Ok;
 use tracing::info;
-use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -30,13 +29,12 @@ async fn main() -> anyhow::Result<()> {
 fn print_banner() {
     println!(
         r#"
-  ████████╗ █████╗ ██╗  ██╗██╗   ██╗███╗   ███╗██╗
-  ╚══██╔══╝██╔══██╗██║ ██╔╝██║   ██║████╗ ████║██║
-     ██║   ███████║█████╔╝ ██║   ██║██╔████╔██║██║
-     ██║   ██╔══██║██╔═██╗ ██║   ██║██║╚██╔╝██║██║
-     ██║   ██║  ██║██║  ██╗╚██████╔╝██║ ╚═╝ ██║██║
-     ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚═╝
-  High-performance Minecraft Proxy — v{}
+  _____     _                    _ 
+ |_   _|_ _| | ___   _ _ __ ___ (_)
+   | |/ _` | |/ / | | | '_ ` _ \| |
+   | | (_| |   <| |_| | | | | | | |
+   |_|\__,_|_|\_\\__,_|_| |_| |_|_|
+ High-performance Minecraft Proxy - v{}
 "#,
         env!("CARGO_PKG_VERSION")
     );
