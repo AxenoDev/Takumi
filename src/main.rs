@@ -1,8 +1,14 @@
-mod config;
+mod configuration;
+mod player;
+mod protocol;
+mod proxy;
+mod server;
 
-use crate::config::TakumiConfig;
+use crate::{configuration::TakumiConfig, proxy::TakumiProxy};
 use anyhow::Ok;
+use std::sync::Arc;
 use tracing::info;
+use tracing_subscriber::{self, EnvFilter, fmt};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -18,9 +24,29 @@ async fn main() -> anyhow::Result<()> {
         }
     };
 
+    let filter = EnvFilter::try_new("info").unwrap_or_else(|_| EnvFilter::new("info"));
+
+    fmt().with_env_filter(filter).with_target(false).init();
+
     print_banner();
 
-    info!("Starting Takumi Proxy on {}:{}", config.proxy.bind, config.proxy.port);
+    info!(
+        "Starting Takumi Proxy on {}:{}",
+        config.proxy.bind, config.proxy.port
+    );
+
+    let proxy = TakumiProxy::new(Arc::new(config))?;
+
+    tokio::select! {
+        res = proxy.run() => {
+            if let Err(e) = res {
+                eprintln!("Proxy encountered a fatal error: {e}");
+            }
+        }
+        _ = tokio::signal::ctrl_c() => {
+            info!("Shutdown signal received, shutting down...");
+        }
+    }
 
     info!("Goodbye!");
     Ok(())

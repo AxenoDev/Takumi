@@ -11,6 +11,9 @@ pub struct TakumiConfig {
 pub struct ProxyConfig {
     pub bind: String,
     pub port: u16,
+    pub motd: String,
+    pub max_players: u32,
+    pub online_mode: bool,
 }
 
 impl TakumiConfig {
@@ -29,11 +32,14 @@ impl TakumiConfig {
 
 impl Default for TakumiConfig {
     fn default() -> Self {
-        Self { 
-            proxy: ProxyConfig { 
+        Self {
+            proxy: ProxyConfig {
                 bind: "0.0.0.0".to_string(),
                 port: 25565,
-            }
+                motd: "A Minecraft proxy server written in Rust".to_string(),
+                max_players: 20,
+                online_mode: true,
+            },
         }
     }
 }

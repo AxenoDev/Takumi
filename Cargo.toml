@@ -28,6 +28,7 @@ rand = "0.10"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
 anyhow = "1"
+futures-util = { version = "0.3.30", features = ["sink"] }
 thiserror = "2"
 dashmap = "6"
 async-trait = "0.1"
