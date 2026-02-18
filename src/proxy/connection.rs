@@ -1,4 +1,5 @@
-use futures_util::StreamExt;
+use futures_util::sink::SinkExt;
+use futures_util::stream::StreamExt;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::net::TcpStream;
@@ -9,7 +10,10 @@ use crate::{
     configuration::TakumiConfig,
     player::{handshake::HandshakeHandler, registry::PlayerRegistry},
     protocol::{MinecraftCodec, State},
-    proxy::status::StatusHandler,
+    proxy::{
+        login::{self, LoginHandler},
+        status::StatusHandler,
+    },
 };
 
 pub struct ConnectionHandler {
@@ -50,6 +54,16 @@ impl ConnectionHandler {
             State::Status => {
                 StatusHandler::new(
                     &mut framed,
+                    self.addr,
+                    Arc::clone(&self.config),
+                    Arc::clone(&self.players),
+                )
+                .handle()
+                .await?;
+            }
+            State::Login => {
+                LoginHandler::new(
+                    framed,
                     self.addr,
                     Arc::clone(&self.config),
                     Arc::clone(&self.players),

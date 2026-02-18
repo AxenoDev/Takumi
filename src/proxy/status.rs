@@ -51,12 +51,18 @@ impl<'a> StatusHandler<'a> {
         let status_json = serde_json::json!({
             "version": {
                 "name": format!("Takumi {}", env!("CARGO_PKG_VERSION")),
-                "protocol": 763,
+                "protocol": 774,
             },
             "players": {
                 "max": &self.config.proxy.max_players,
                 "online": online,
                 "sample": [],
+                "list": self.players.list().await.iter().map(|p| {
+                    serde_json::json!({
+                        "name": p.username,
+                        "id": p.uuid.to_string(),
+                    })
+                }).collect::<Vec<_>>(),
             },
             "description": {
                 "text": &self.config.proxy.motd,
