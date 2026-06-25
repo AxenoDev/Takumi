@@ -13,7 +13,6 @@ async fn main() {
 
     loop {
         let (socket, client_addr) = listener.accept().await.unwrap();
-        println!("connection from {client_addr}");
 
         tokio::spawn(async move {
             if let Err(err) = handle_connection(socket).await {
