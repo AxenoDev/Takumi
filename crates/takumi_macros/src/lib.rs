@@ -57,22 +57,16 @@ fn expand_packet_meta(input: &DeriveInput, direction: TokenStream2) -> syn::Resu
 pub fn derive_packet_in(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
 
-    expand_packet_meta(
-        &input,
-        quote! { crate::packet::PacketDirection::In },
-    )
-    .unwrap_or_else(|err| err.to_compile_error())
-    .into()
+    expand_packet_meta(&input, quote! { crate::packet::PacketDirection::In })
+        .unwrap_or_else(|err| err.to_compile_error())
+        .into()
 }
 
 #[proc_macro_derive(PacketOut, attributes(packet))]
 pub fn derive_packet_out(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
 
-    expand_packet_meta(
-        &input,
-        quote! { crate::packet::PacketDirection::Out },
-    )
-    .unwrap_or_else(|err| err.to_compile_error())
-    .into()
+    expand_packet_meta(&input, quote! { crate::packet::PacketDirection::Out })
+        .unwrap_or_else(|err| err.to_compile_error())
+        .into()
 }
