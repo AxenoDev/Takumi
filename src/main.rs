@@ -81,7 +81,7 @@ async fn main() {
                         }
                     }
                     Err(e) => {
-                        eprintln!("read errorr {}", e);
+                        eprintln!("read error: {}", e);
                         break;
                     }
                 }
