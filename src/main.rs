@@ -4,7 +4,6 @@ use tokio::io::AsyncReadExt;
 use tokio::net::TcpListener;
 use protocol::reader::PacketReader;
 use crate::protocol::packets::handshake::HandshakePacket;
-use crate::protocol::packets::transfer::TransferPacket;
 
 #[tokio::main]
 async fn main() {
@@ -61,18 +60,6 @@ async fn main() {
                                 };
 
                                 println!("{:#?}", handshake);
-                            }
-
-                            0x7A => {
-                                let transfer = match TransferPacket::decode(&mut reader) {
-                                    Ok(packet) => packet,
-                                    Err(e) => {
-                                        eprintln!("transfer error: {e}");
-                                        continue;
-                                    }
-                                };
-
-                                println!("{:#?}", transfer)
                             }
 
                             _ => {

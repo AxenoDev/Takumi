@@ -13,12 +13,15 @@ impl<'a> PacketReader<'a> {
         let mut result = 0i32;
 
         loop {
+            if self.pos >= self.data.len() {
+                return Err("VarInt: unexpected end of data");
+            }
+
             let byte = self.data[self.pos];
             self.pos += 1;
 
             let value = (byte & 0x7F) as i32;
             result |= value << (7 * num_read);
-
             num_read += 1;
 
             if num_read > 5 {
@@ -36,26 +39,22 @@ impl<'a> PacketReader<'a> {
     pub fn read_string(&mut self) -> Result<String, &'static str> {
         let len = self.read_varint()? as usize;
 
-        let byte_len = len * 2;
-
-        if self.pos + byte_len > self.data.len() {
+        if self.pos + len > self.data.len() {
             return Err("string out of bounds");
         }
 
-        let bytes = &self.data[self.pos..self.pos + byte_len];
-        self.pos += byte_len;
+        let bytes = &self.data[self.pos..self.pos + len];
+        self.pos += len;
 
-        let utf16: Vec<u16> = bytes
-            .chunks_exact(2)
-            .map(|pair| u16::from_be_bytes([pair[0], pair[1]]))
-            .collect();
-
-        String::from_utf16(&utf16).map_err(|_| "invalid utf-16")
+        String::from_utf8(bytes.to_vec()).map_err(|_| "invalid utf-8")
     }
 
     pub fn read_u16(&mut self) -> Result<u16, &'static str> {
-        let value = u16::from_be_bytes([self.data[self.pos], self.data[self.pos + 1]]);
+        if self.pos + 2 > self.data.len() {
+            return Err("u16: unexpected end of data");
+        }
 
+        let value = u16::from_be_bytes([self.data[self.pos], self.data[self.pos + 1]]);
         self.pos += 2;
 
         Ok(value)
