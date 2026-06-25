@@ -40,6 +40,10 @@ impl PacketWriter {
         self.buf.len()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.buf.is_empty()
+    }
+
     pub fn into_inner(self) -> Vec<u8> {
         self.buf
     }
