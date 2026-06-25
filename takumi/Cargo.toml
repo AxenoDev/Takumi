@@ -1,0 +1,12 @@
+[package]
+name = "takumi"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "takumi"
+path = "src/main.rs"
+
+[dependencies]
+minecraft_packet = { path = "../crates/minecraft_packet" }
+tokio = { version = "1.0", features = ["full"] }

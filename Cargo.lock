@@ -3,13 +3,6 @@
 version = 4
 
 [[package]]
-name = "Takumi"
-version = "0.1.0"
-dependencies = [
- "tokio",
-]
-
-[[package]]
 name = "bitflags"
 version = "2.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -50,6 +43,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "224399e74b87b5f3557511d98dff8b14089b3dadafcab6bb93eab67d3aace965"
 dependencies = [
  "scopeguard",
+]
+
+[[package]]
+name = "minecraft_packet"
+version = "0.1.0"
+dependencies = [
+ "takumi_macros",
+ "tokio",
 ]
 
 [[package]]
@@ -160,6 +161,23 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
+]
+
+[[package]]
+name = "takumi"
+version = "0.1.0"
+dependencies = [
+ "minecraft_packet",
+ "tokio",
+]
+
+[[package]]
+name = "takumi_macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
