@@ -32,6 +32,10 @@ impl PacketWriter {
         self.buf.extend_from_slice(&value.to_be_bytes());
     }
 
+    pub fn write_uuid(&mut self, value: &uuid::Uuid) {
+        self.buf.extend_from_slice(value.as_bytes());
+    }
+
     pub fn extend(&mut self, bytes: impl AsRef<[u8]>) {
         self.buf.extend_from_slice(bytes.as_ref());
     }

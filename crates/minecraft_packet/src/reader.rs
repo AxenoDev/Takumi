@@ -85,4 +85,15 @@ impl<'a> PacketReader<'a> {
 
         Ok(value)
     }
+
+    pub fn read_uuid(&mut self) -> Result<uuid::Uuid, ProtocolError> {
+        if self.pos + 16 > self.data.len() {
+            return Err(ProtocolError::UnexpectedEof);
+        }
+
+        let bytes = &self.data[self.pos..self.pos + 16];
+        self.pos += 16;
+
+        Ok(uuid::Uuid::from_slice(bytes).map_err(|_| ProtocolError::InvalidUuid)?)
+    }
 }
