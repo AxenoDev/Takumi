@@ -9,4 +9,4 @@ path = "src/main.rs"
 
 [dependencies]
 minecraft_packet = { path = "../crates/minecraft_packet" }
-tokio = { version = "1.0", features = ["full"] }
+tokio = { workspace = true }

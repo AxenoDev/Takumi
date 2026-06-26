@@ -5,4 +5,5 @@ edition = "2024"
 
 [dependencies]
 takumi_macros = { path = "../takumi_macros" }
-tokio = { version = "1.0", features = ["full"] }
+tokio = { workspace = true }
+uuid = { workspace = true }
