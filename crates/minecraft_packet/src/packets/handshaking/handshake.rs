@@ -1,6 +1,6 @@
+use minecraft_protocol::State;
+use takumi_binutils::{ProtocolError, ProtocolRead, reader::PacketReader};
 use takumi_macros::PacketIn;
-
-use crate::{IncomingPacket, error::ProtocolError};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Intent {
@@ -24,6 +24,22 @@ impl Intent {
             Self::Status => 1,
             Self::Login => 2,
             Self::Transfer => 3,
+        }
+    }
+}
+
+impl ProtocolRead for Intent {
+    fn read_from(reader: &mut PacketReader<'_>) -> Result<Self, ProtocolError> {
+        Self::from_varint(reader.read_varint()?)
+    }
+}
+
+impl From<Intent> for State {
+    fn from(intent: Intent) -> Self {
+        match intent {
+            Intent::Status => State::Status,
+            Intent::Login => State::Login,
+            Intent::Transfer => State::Transfer,
         }
     }
 }
@@ -62,28 +78,5 @@ impl HandshakePacket {
             server_port,
             intent: Intent::Login,
         }
-    }
-}
-
-impl IncomingPacket for HandshakePacket {
-    fn decode_payload(
-        reader: &mut crate::reader::PacketReader<'_>,
-    ) -> Result<Self, crate::error::ProtocolError> {
-        let protocol_version = reader.read_varint()?;
-        let server_address = reader.read_string()?;
-        let server_port = reader.read_u16()?;
-        let intent = Intent::from_varint(reader.read_varint()?)?;
-
-        println!(
-            "HandshakePacket received: protocol_version={}, server_address={}, server_port={}, intent={:?}",
-            protocol_version, server_address, server_port, intent
-        );
-
-        Ok(Self {
-            protocol_version,
-            server_address,
-            server_port,
-            intent,
-        })
     }
 }

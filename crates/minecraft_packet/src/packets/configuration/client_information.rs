@@ -1,4 +1,3 @@
-use crate::IncomingPacket;
 use takumi_macros::PacketIn;
 
 #[derive(Debug, Clone, PacketIn)]
@@ -12,21 +11,4 @@ pub struct ClientInformationPacket {
     pub main_hand: i32,
     pub enable_text_filtering: bool,
     pub allow_server_listings: bool,
-}
-
-impl IncomingPacket for ClientInformationPacket {
-    fn decode_payload(
-        reader: &mut crate::reader::PacketReader<'_>,
-    ) -> Result<Self, crate::ProtocolError> {
-        Ok(Self {
-            locale: reader.read_string()?,
-            view_distance: reader.read_i8()?,
-            chat_mode: reader.read_varint()?,
-            chat_colors: reader.read_bool()?,
-            displayed_skin_parts: reader.read_u8()?,
-            main_hand: reader.read_varint()?,
-            enable_text_filtering: reader.read_bool()?,
-            allow_server_listings: reader.read_bool()?,
-        })
-    }
 }

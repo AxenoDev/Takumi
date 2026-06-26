@@ -1,9 +1,9 @@
+use takumi_binutils::ProtocolError;
+use takumi_binutils::writer::PacketWriter;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
 
-use crate::error::ProtocolError;
 use crate::packet::{OutgoingPacket, RawPacket};
-use crate::writer::PacketWriter;
 
 pub struct Connection {
     stream: TcpStream,
@@ -31,7 +31,17 @@ impl Connection {
 
     pub async fn send<P: OutgoingPacket>(&mut self, packet: &P) -> Result<(), ProtocolError> {
         let payload = packet.encode()?;
+        self.send_framed(&payload).await
+    }
 
+    pub async fn send_raw(&mut self, packet: &RawPacket) -> Result<(), ProtocolError> {
+        let mut body = PacketWriter::new();
+        body.write_varint(packet.id);
+        body.extend(&packet.payload);
+        self.send_framed(&body.into_inner()).await
+    }
+
+    async fn send_framed(&mut self, payload: &[u8]) -> Result<(), ProtocolError> {
         let mut frame = PacketWriter::new();
         frame.write_varint(payload.len() as i32);
         frame.extend(payload);

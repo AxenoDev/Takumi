@@ -1,5 +1,11 @@
 [workspace]
-members = ["takumi", "crates/minecraft_packet", "crates/takumi_macros"]
+members = [
+    "takumi",
+    "crates/minecraft_packet",
+    "crates/takumi_macros",
+    "crates/minecraft_protocol",
+    "crates/takumi_binutils", "crates/protocol_version",
+]
 resolver = "2"
 
 [workspace.dependencies]
@@ -8,3 +14,4 @@ uuid = { version = "1", features = ["v4"] }
 proc-macro2 = "1"
 quote = "1"
 syn = { version = "2", features = ["full"] }
+thiserror = "2"

@@ -40,6 +40,19 @@ impl PacketWriter {
         self.buf.push(if value { 1 } else { 0 });
     }
 
+    pub fn write_i8(&mut self, value: i8) {
+        self.buf.push(value as u8);
+    }
+
+    pub fn write_u8(&mut self, value: u8) {
+        self.buf.push(value);
+    }
+
+    pub fn write_byte_array(&mut self, value: &[u8]) {
+        self.write_varint(value.len() as i32);
+        self.buf.extend_from_slice(value);
+    }
+
     pub fn extend(&mut self, bytes: impl AsRef<[u8]>) {
         self.buf.extend_from_slice(bytes.as_ref());
     }

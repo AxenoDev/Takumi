@@ -1,71 +1,65 @@
-use minecraft_packet::packets::{configuration, handshaking, login, status};
-use minecraft_packet::{Connection, ConnectionState, ProtocolError};
-use tokio::net::TcpListener;
+use std::sync::Arc;
+
+use minecraft_packet::Connection;
+use takumi::server::{
+    PacketHandler, client_state::ClientState, packet_handler::PacketHandlerError,
+    packet_registry::PacketRegistry, server_state::ServerState,
+};
+use takumi_binutils::ProtocolError;
 
 #[tokio::main]
 async fn main() {
     let addr = "0.0.0.0:25565";
-    let listener = TcpListener::bind(addr)
+    let listener = tokio::net::TcpListener::bind(addr)
         .await
         .expect("failed to bind on port 25565");
+
+    let server_state = Arc::new(ServerState::default());
 
     println!("Takumi listening on {addr}");
 
     loop {
         let (socket, client_addr) = listener.accept().await.unwrap();
+        let server_state = Arc::clone(&server_state);
 
         tokio::spawn(async move {
-            if let Err(err) = handle_connection(socket).await {
+            if let Err(err) = handle_connection(socket, server_state).await {
                 eprintln!("{client_addr}: {err}");
             }
         });
     }
 }
 
-async fn handle_connection(socket: tokio::net::TcpStream) -> Result<(), ProtocolError> {
+async fn handle_connection(
+    socket: tokio::net::TcpStream,
+    server_state: Arc<ServerState>,
+) -> Result<(), ProtocolError> {
     let mut conn = Connection::new(socket);
-    let mut state = ConnectionState::Handshaking;
+    let mut client_state = ClientState::new();
 
     loop {
         let raw = conn.receive().await?;
+        let packet = PacketRegistry::decode_serverbound(client_state.serverbound_state(), &raw)?;
 
-        match state {
-            ConnectionState::Handshaking => {
-                let intent = handshaking::handle(raw)?;
-                state = ConnectionState::from(intent);
-            }
+        let should_disconnect = matches!(packet, PacketRegistry::PingRequest(_));
 
-            ConnectionState::Status => {
-                if status::handle(&mut conn, raw).await? {
-                    break;
+        let batch = match packet.handle(&mut client_state, &server_state) {
+            Ok(batch) => batch,
+            Err(PacketHandlerError::InvalidState(message, should_warn)) => {
+                if should_warn {
+                    eprintln!("{message}");
                 }
+                break;
             }
+            Err(PacketHandlerError::Custom(message)) => {
+                return Err(ProtocolError::Io(message));
+            }
+        };
 
-            ConnectionState::Login => {
-                if let Some(new_state) = login::handle(&mut conn, raw).await? {
-                    state = new_state;
-                }
-            }
+        batch.execute(&mut conn, &mut client_state).await?;
 
-            ConnectionState::Transfer => {
-                return Err(ProtocolError::UnknownPacket {
-                    id: raw.id,
-                    conn: Some(state),
-                });
-            }
-
-            ConnectionState::Configuration => {
-                if let Some(new_state) = configuration::handle(&mut conn, raw).await? {
-                    state = new_state;
-                }
-            }
-
-            ConnectionState::Play => {
-                return Err(ProtocolError::UnknownPacket {
-                    id: raw.id,
-                    conn: Some(state),
-                });
-            }
+        if should_disconnect {
+            break;
         }
     }
 

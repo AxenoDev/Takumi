@@ -1,6 +1,7 @@
-use crate::{OutgoingPacket, error::ProtocolError, writer::PacketWriter};
-use takumi_macros::PacketOut;
+use takumi_binutils::{ProtocolError, ProtocolWrite, writer::PacketWriter};
 use uuid::Uuid;
+
+use crate::packet::{OutgoingPacket, PacketDirection, PacketMeta};
 
 #[derive(Debug, Clone)]
 pub struct Property {
@@ -9,13 +10,32 @@ pub struct Property {
     pub signature: Option<String>,
 }
 
-#[derive(Debug, Clone, PacketOut)]
-#[packet(id = 0x02)]
+impl ProtocolWrite for Property {
+    fn write_to(&self, writer: &mut PacketWriter) -> Result<(), ProtocolError> {
+        writer.write_string(&self.name);
+        writer.write_string(&self.value);
+        match &self.signature {
+            Some(sig) => {
+                writer.write_bool(true);
+                writer.write_string(sig);
+            }
+            None => writer.write_bool(false),
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct LoginSuccessPacket {
     pub uuid: Uuid,
     pub username: String,
     pub properties: Vec<Property>,
     pub protocol_version: i32,
+}
+
+impl PacketMeta for LoginSuccessPacket {
+    const ID: i32 = 0x02;
+    const DIRECTION: PacketDirection = PacketDirection::Out;
 }
 
 impl LoginSuccessPacket {
@@ -31,23 +51,9 @@ impl LoginSuccessPacket {
 
 impl OutgoingPacket for LoginSuccessPacket {
     fn encode_payload(&self, writer: &mut PacketWriter) -> Result<(), ProtocolError> {
-        writer.write_uuid(&self.uuid);
-        writer.write_string(&self.username);
-
-        writer.write_varint(self.properties.len() as i32);
-        for prop in &self.properties {
-            writer.write_string(&prop.name);
-            writer.write_string(&prop.value);
-            match &prop.signature {
-                Some(sig) => {
-                    writer.write_bool(true);
-                    writer.write_string(sig);
-                }
-                None => {
-                    writer.write_bool(false);
-                }
-            }
-        }
+        self.uuid.write_to(writer)?;
+        self.username.write_to(writer)?;
+        self.properties.write_to(writer)?;
 
         if self.protocol_version >= 776 {
             let session_id = uuid::Uuid::new_v4();

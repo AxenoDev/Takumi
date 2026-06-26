@@ -1,6 +1,6 @@
-use crate::error::ProtocolError;
+use takumi_binutils::{ProtocolError, reader::PacketReader};
+
 use crate::packet::IncomingPacket;
-use crate::reader::PacketReader;
 
 #[derive(Debug, Clone)]
 pub struct RawPacket {

@@ -1,10 +1,7 @@
 mod raw;
 
 pub use raw::RawPacket;
-
-use crate::error::ProtocolError;
-use crate::reader::PacketReader;
-use crate::writer::PacketWriter;
+use takumi_binutils::{ProtocolError, reader::PacketReader, writer::PacketWriter};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PacketDirection {
