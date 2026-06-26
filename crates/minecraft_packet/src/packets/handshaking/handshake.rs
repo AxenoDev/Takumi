@@ -69,11 +69,21 @@ impl IncomingPacket for HandshakePacket {
     fn decode_payload(
         reader: &mut crate::reader::PacketReader<'_>,
     ) -> Result<Self, crate::error::ProtocolError> {
+        let protocol_version = reader.read_varint()?;
+        let server_address = reader.read_string()?;
+        let server_port = reader.read_u16()?;
+        let intent = Intent::from_varint(reader.read_varint()?)?;
+
+        println!(
+            "HandshakePacket received: protocol_version={}, server_address={}, server_port={}, intent={:?}",
+            protocol_version, server_address, server_port, intent
+        );
+
         Ok(Self {
-            protocol_version: reader.read_varint()?,
-            server_address: reader.read_string()?,
-            server_port: reader.read_u16()?,
-            intent: Intent::from_varint(reader.read_varint()?)?,
+            protocol_version,
+            server_address,
+            server_port,
+            intent,
         })
     }
 }

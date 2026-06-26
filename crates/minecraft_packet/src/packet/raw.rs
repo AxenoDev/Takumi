@@ -11,7 +11,10 @@ pub struct RawPacket {
 impl RawPacket {
     pub fn decode<P: IncomingPacket>(&self) -> Result<P, ProtocolError> {
         if self.id != P::ID {
-            return Err(ProtocolError::UnknownPacket { id: self.id });
+            return Err(ProtocolError::UnknownPacket {
+                id: self.id,
+                conn: None,
+            });
         }
 
         let mut reader = PacketReader::new(&self.payload);

@@ -5,7 +5,9 @@ pub enum ConnectionState {
     Handshaking,
     Status,
     Login,
+    Play,
     Transfer,
+    Configuration,
 }
 
 impl From<Intent> for ConnectionState {

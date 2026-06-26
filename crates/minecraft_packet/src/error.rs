@@ -1,5 +1,7 @@
 use std::fmt;
 
+use crate::ConnectionState;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ProtocolError {
     UnexpectedEof,
@@ -7,7 +9,10 @@ pub enum ProtocolError {
     InvalidUtf8,
     InvalidUuid,
     InvalidIntent(i32),
-    UnknownPacket { id: i32 },
+    UnknownPacket {
+        id: i32,
+        conn: Option<ConnectionState>,
+    },
     Io(String),
 }
 
@@ -19,7 +24,10 @@ impl fmt::Display for ProtocolError {
             Self::InvalidUtf8 => write!(f, "invalid UTF-8 string"),
             Self::InvalidUuid => write!(f, "invalid UUID"),
             Self::InvalidIntent(v) => write!(f, "unknown handshake intent: {v}"),
-            Self::UnknownPacket { id } => write!(f, "unknown packet id: 0x{id:02X}"),
+            Self::UnknownPacket { id, conn } => write!(
+                f,
+                "unknown packet id: 0x{id:02X}, connection state: {conn:?}"
+            ),
             Self::Io(msg) => write!(f, "io error: {msg}"),
         }
     }

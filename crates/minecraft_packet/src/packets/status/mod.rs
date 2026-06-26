@@ -26,6 +26,9 @@ pub async fn handle(conn: &mut Connection, raw: RawPacket) -> Result<bool, Proto
             Ok(true)
         }
 
-        id => Err(ProtocolError::UnknownPacket { id }),
+        id => Err(ProtocolError::UnknownPacket {
+            id,
+            conn: Some(crate::ConnectionState::Status),
+        }),
     }
 }

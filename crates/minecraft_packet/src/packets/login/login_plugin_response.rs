@@ -6,7 +6,8 @@ use crate::IncomingPacket;
 #[packet(id = 0x02)]
 pub struct LoginPluginResponsePacket {
     pub message_id: i32,
-    pub data: Option<Vec<u8>>,
+    pub is_present: bool,
+    pub data: Vec<u8>,
 }
 
 impl IncomingPacket for LoginPluginResponsePacket {
@@ -17,8 +18,17 @@ impl IncomingPacket for LoginPluginResponsePacket {
         Self: Sized,
     {
         let message_id = reader.read_varint()?;
-        let data = Some(reader.read_remaining_bytes());
+        let is_present = reader.read_bool()?;
+        let data = if is_present {
+            Some(reader.read_remaining_bytes())
+        } else {
+            None
+        };
 
-        Ok(Self { message_id, data })
+        Ok(Self {
+            message_id,
+            is_present,
+            data: data.unwrap_or_default(),
+        })
     }
 }

@@ -1,4 +1,4 @@
-use minecraft_packet::packets::{handshaking, login, status};
+use minecraft_packet::packets::{configuration, handshaking, login, status};
 use minecraft_packet::{Connection, ConnectionState, ProtocolError};
 use tokio::net::TcpListener;
 
@@ -42,11 +42,29 @@ async fn handle_connection(socket: tokio::net::TcpStream) -> Result<(), Protocol
             }
 
             ConnectionState::Login => {
-                login::handle(&mut conn, raw).await?;
+                if let Some(new_state) = login::handle(&mut conn, raw).await? {
+                    state = new_state;
+                }
             }
 
             ConnectionState::Transfer => {
-                return Err(ProtocolError::UnknownPacket { id: raw.id });
+                return Err(ProtocolError::UnknownPacket {
+                    id: raw.id,
+                    conn: Some(state),
+                });
+            }
+
+            ConnectionState::Configuration => {
+                if let Some(new_state) = configuration::handle(&mut conn, raw).await? {
+                    state = new_state;
+                }
+            }
+
+            ConnectionState::Play => {
+                return Err(ProtocolError::UnknownPacket {
+                    id: raw.id,
+                    conn: Some(state),
+                });
             }
         }
     }

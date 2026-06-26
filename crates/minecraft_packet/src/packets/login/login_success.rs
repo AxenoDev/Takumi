@@ -50,13 +50,11 @@ impl OutgoingPacket for LoginSuccessPacket {
         }
 
         if self.protocol_version >= 776 {
-            writer.write_uuid(&Uuid::new_v4());
+            let session_id = uuid::Uuid::new_v4();
+            let (most, least) = session_id.as_u64_pair();
+            writer.write_i64(most as i64);
+            writer.write_i64(least as i64);
         }
-
-        println!(
-            "LoginSuccessPacket sent: uuid={}, username={}, properties={:?}",
-            self.uuid, self.username, self.properties
-        );
 
         Ok(())
     }

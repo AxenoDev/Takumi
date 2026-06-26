@@ -1,3 +1,5 @@
+use uuid::Uuid;
+
 use crate::error::ProtocolError;
 
 pub struct PacketReader<'a> {
@@ -94,7 +96,7 @@ impl<'a> PacketReader<'a> {
         let bytes = &self.data[self.pos..self.pos + 16];
         self.pos += 16;
 
-        Ok(uuid::Uuid::from_slice(bytes).map_err(|_| ProtocolError::InvalidUuid)?)
+        Uuid::from_slice(bytes).map_err(|_| ProtocolError::InvalidUuid)
     }
 
     pub fn read_bool(&mut self) -> Result<bool, ProtocolError> {
@@ -122,5 +124,23 @@ impl<'a> PacketReader<'a> {
         let bytes = self.data[self.pos..].to_vec();
         self.pos = self.data.len();
         bytes
+    }
+
+    pub fn read_i8(&mut self) -> Result<i8, ProtocolError> {
+        if self.pos >= self.data.len() {
+            return Err(ProtocolError::UnexpectedEof);
+        }
+        let b = self.data[self.pos] as i8;
+        self.pos += 1;
+        Ok(b)
+    }
+
+    pub fn read_u8(&mut self) -> Result<u8, ProtocolError> {
+        if self.pos >= self.data.len() {
+            return Err(ProtocolError::UnexpectedEof);
+        }
+        let b = self.data[self.pos];
+        self.pos += 1;
+        Ok(b)
     }
 }
