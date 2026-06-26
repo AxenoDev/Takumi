@@ -96,4 +96,31 @@ impl<'a> PacketReader<'a> {
 
         Ok(uuid::Uuid::from_slice(bytes).map_err(|_| ProtocolError::InvalidUuid)?)
     }
+
+    pub fn read_bool(&mut self) -> Result<bool, ProtocolError> {
+        if self.pos >= self.data.len() {
+            return Err(ProtocolError::UnexpectedEof);
+        }
+
+        let b = self.data[self.pos];
+        self.pos += 1;
+
+        Ok(b != 0)
+    }
+
+    pub fn read_byte_array(&mut self) -> Result<Vec<u8>, ProtocolError> {
+        let len = self.read_varint()? as usize;
+        if self.pos + len > self.data.len() {
+            return Err(ProtocolError::UnexpectedEof);
+        }
+        let bytes = self.data[self.pos..self.pos + len].to_vec();
+        self.pos += len;
+        Ok(bytes)
+    }
+
+    pub fn read_remaining_bytes(&mut self) -> Vec<u8> {
+        let bytes = self.data[self.pos..].to_vec();
+        self.pos = self.data.len();
+        bytes
+    }
 }

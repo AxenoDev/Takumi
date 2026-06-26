@@ -36,6 +36,10 @@ impl PacketWriter {
         self.buf.extend_from_slice(value.as_bytes());
     }
 
+    pub fn write_bool(&mut self, value: bool) {
+        self.buf.push(if value { 1 } else { 0 });
+    }
+
     pub fn extend(&mut self, bytes: impl AsRef<[u8]>) {
         self.buf.extend_from_slice(bytes.as_ref());
     }
