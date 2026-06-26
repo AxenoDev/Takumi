@@ -63,3 +63,7 @@ If you discover a security vulnerability, please report it responsibly. See [SEC
 ## License
 
 Takumi is licensed under the [GNU General Public License v3.0](LICENSE).
+
+<p align="center">
+  <sub>Some parts of the code are inspired by <a href="https://github.com/Quozul/PicoLimbo">PicoLimbo</a>.</sub>
+</p>
